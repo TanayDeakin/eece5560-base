@@ -56,7 +56,7 @@ class Drive_Square:
             # Turn 90 degrees
             self.cmd_msg.header.stamp = rospy.Time.now()
             self.cmd_msg.v = 0.0  # Stop moving forward
-            self.cmd_msg.omega = 1.57  # Set angular velocity to turn 90 degrees (1.57 rad/s = 90 degrees/s)
+            self.cmd_msg.omega = 2  # Set angular velocity to turn 90 degrees (1.57 rad/s = 90 degrees/s)
             self.pub.publish(self.cmd_msg)
             rospy.loginfo("Turning 90 degrees!")
             rospy.sleep(1)  # Turn for 1 second (90 degrees)
