@@ -51,7 +51,7 @@ class Drive_Square:
             self.cmd_msg.omega = 0.0  # No rotation
             self.pub.publish(self.cmd_msg)
             rospy.loginfo("Moving forward!")
-            rospy.sleep(1)  # Move for 2 seconds (1 meter)
+            rospy.sleep(2)  # Move for 2 seconds (1 meter)
             
             # Turn 90 degrees
             self.cmd_msg.header.stamp = rospy.Time.now()
