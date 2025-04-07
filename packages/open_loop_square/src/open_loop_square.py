@@ -41,7 +41,7 @@ class Drive_Square:
         # Move forward for 1 meter (2 seconds)
         for i in range(4):
             self.cmd_msg.header.stamp = rospy.Time.now()
-            self.cmd_msg.v = 0.5  # Forward velocity (0.5 m/s)
+            self.cmd_msg.v = 0.25  # Forward velocity (0.5 m/s)
             self.cmd_msg.omega = 0.0  # No rotation
             self.pub.publish(self.cmd_msg)
             rospy.loginfo("Moving forward!")
