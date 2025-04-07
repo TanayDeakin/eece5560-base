@@ -8,17 +8,23 @@ class Drive_Square:
     def __init__(self):
         # Initialize global class variables
         self.cmd_msg = Twist2DStamped()
-
+        
         # Initialize ROS node
         rospy.init_node('drive_square_node', anonymous=True)
         
         # Initialize Pub/Subs
         self.pub = rospy.Publisher('/robot/car_cmd_switch_node/cmd', Twist2DStamped, queue_size=1)
         rospy.Subscriber('/robot/fsm_node/mode', FSMState, self.fsm_callback, queue_size=1)
+
+        self.old_state = None
         
     # robot only moves when lane following is selected on the duckiebot joystick app
     def fsm_callback(self, msg):
         rospy.loginfo("State: %s", msg.state)
+        if self.old_state == msg.state:
+            rospy.loginfo("Duplicate keypress ignored")
+            return
+        self.old_state = msg.state
         if msg.state == "NORMAL_JOYSTICK_CONTROL":
             self.stop_robot()
         elif msg.state == "LANE_FOLLOWING":            
@@ -45,7 +51,7 @@ class Drive_Square:
             self.cmd_msg.omega = 0.0  # No rotation
             self.pub.publish(self.cmd_msg)
             rospy.loginfo("Moving forward!")
-            rospy.sleep(2)  # Move for 2 seconds (1 meter)
+            rospy.sleep(1)  # Move for 2 seconds (1 meter)
             
             # Turn 90 degrees
             self.cmd_msg.header.stamp = rospy.Time.now()
