@@ -1,4 +1,4 @@
-##!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import rospy
 from duckietown_msgs.msg import WheelEncoderStamped, Twist2DStamped
