@@ -20,8 +20,8 @@ class ClosedLoopController:
         self.last_left_ticks = 0
         self.last_right_ticks = 0
 
-        self.ticks_per_meter = 1350  # Adjust based on your robot calibration
-        self.ticks_per_90_deg = 300  # Adjust based on your robot's turn arc
+        self.ticks_per_meter = 740 # Adjust based on your robot calibration
+        self.ticks_per_90_deg = 120  # Adjust based on your robot's turn arc
 
         self.moving = False
         self.goal_ticks = 0
@@ -100,7 +100,7 @@ class ClosedLoopController:
 
     def draw_closed_loop_square(self):
         side_length = 1.0  # meters
-        linear_speed = 0.3
+        linear_speed = 1.0
         angular_speed = 1.0
 
         for i in range(4):
