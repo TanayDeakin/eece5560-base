@@ -54,7 +54,7 @@ class ClosedLoopController:
         return (delta_left + delta_right) / 2.0
 
     def start_side_movement(self):
-        if self.current_side < 4:
+        if self.current_side < 5:
             rospy.loginfo(f"Moving straight: Side {self.current_side + 1}")
             self.reset_encoders()
             self.goal_ticks = self.side_length * self.ticks_per_meter
@@ -76,7 +76,7 @@ class ClosedLoopController:
         if self.state == "MOVING_STRAIGHT":
             if self.get_average_delta_ticks() >= self.goal_ticks:
                 self.stop_robot()
-                self.start_side_movement()
+                self.start_rotation()
                 
                 
             else:
@@ -89,7 +89,7 @@ class ClosedLoopController:
             if self.get_average_delta_ticks() >= self.goal_ticks:
                 self.stop_robot()
                 self.current_side += 1
-                self.start_rotation()
+                self.start_side_movement()
               
             else:
                 self.cmd_msg.header.stamp = rospy.Time.now()
