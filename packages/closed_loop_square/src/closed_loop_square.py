@@ -2,6 +2,8 @@
 
 import rospy
 from duckietown_msgs.msg import WheelEncoderStamped, Twist2DStamped, FSMState
+from sensor_msgs.msg import Range
+
 
 class ClosedLoopController:
     def __init__(self):
@@ -11,8 +13,13 @@ class ClosedLoopController:
         rospy.Subscriber('/robot/fsm_node/mode', FSMState, self.fsm_callback)
         rospy.Subscriber('/robot/left_wheel_encoder_node/tick', WheelEncoderStamped, self.left_encoder_callback)
         rospy.Subscriber('/robot/right_wheel_encoder_node/tick', WheelEncoderStamped, self.right_encoder_callback)
+        rospy.Subscriber('/robot/front_center_tof_driver_node/range', Range, self.tof_callback)
+
 
         self.cmd_msg = Twist2DStamped()
+
+        self.obstacle_detected = False
+        self.obstacle_threshold = 0.3  # meters
 
         self.left_ticks = 0
         self.right_ticks = 0
@@ -32,6 +39,14 @@ class ClosedLoopController:
         self.side_length = 1.0
 
         self.timer = rospy.Timer(rospy.Duration(0.1), self.control_callback)  # 10Hz
+
+    def tof_callback(self, msg):
+        if msg.range < self.obstacle_threshold:
+            self.obstacle_detected = True
+            rospy.loginfo("Obstacle detected! Stopping.")
+        else:
+            self.obstacle_detected = False
+
 
     def fsm_callback(self, msg):
         if msg.state == "LANE_FOLLOWING" and self.state == "IDLE":
@@ -54,7 +69,7 @@ class ClosedLoopController:
         return (delta_left + delta_right) / 2.0
 
     def start_side_movement(self):
-        if self.current_side < 5:
+        if self.current_side < 4:
             rospy.loginfo(f"Moving straight: Side {self.current_side + 1}")
             self.reset_encoders()
             self.goal_ticks = self.side_length * self.ticks_per_meter
@@ -73,12 +88,14 @@ class ClosedLoopController:
         self.state = "ROTATING"
 
     def control_callback(self, event):
+        if self.obstacle_detected:
+            self.stop_robot()
+            return  # Don't move if there's an obstacle
+
         if self.state == "MOVING_STRAIGHT":
             if self.get_average_delta_ticks() >= self.goal_ticks:
                 self.stop_robot()
                 self.start_rotation()
-                
-                
             else:
                 self.cmd_msg.header.stamp = rospy.Time.now()
                 self.cmd_msg.v = self.linear_speed * self.direction
@@ -90,12 +107,12 @@ class ClosedLoopController:
                 self.stop_robot()
                 self.current_side += 1
                 self.start_side_movement()
-              
             else:
                 self.cmd_msg.header.stamp = rospy.Time.now()
                 self.cmd_msg.v = 0.0
                 self.cmd_msg.omega = self.angular_speed * self.direction
                 self.cmd_pub.publish(self.cmd_msg)
+
 
     def stop_robot(self):
         self.cmd_msg.header.stamp = rospy.Time.now()
