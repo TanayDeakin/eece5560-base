@@ -19,7 +19,7 @@ class ClosedLoopController:
         self.cmd_msg = Twist2DStamped()
 
         self.obstacle_detected = False
-        self.obstacle_threshold = 0.3  # meters
+        self.obstacle_threshold = 0.1  # meters
 
         self.left_ticks = 0
         self.right_ticks = 0
@@ -41,7 +41,7 @@ class ClosedLoopController:
         self.timer = rospy.Timer(rospy.Duration(0.1), self.control_callback)  # 10Hz
 
     def tof_callback(self, msg):
-        if msg.range < self.obstacle_threshold:
+        if 0.05 < msg.range and msg.range < self.obstacle_threshold:
             self.obstacle_detected = True
             rospy.loginfo("Obstacle detected! Stopping.")
         else:
